@@ -1,0 +1,63 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# =========================
+# Virtual Environments
+# =========================
+ae_env/
+venv/
+.env
+
+# =========================
+# DATASETS (DO NOT PUSH)
+# =========================
+AEModel_jy_screenshots/
+final_test_set/
+
+# =========================
+# EXPERIMENT OUTPUTS
+# =========================
+study_outputs/
+mini_test_outputs/
+baseline_outputs/
+
+# =========================
+# CHECKPOINTS / MODELS
+# =========================
+*.pt
+*.pth
+checkpoints/
+
+# =========================
+# LOGS & PLOTS
+# =========================
+*.log
+*.csv
+*.png
+
+# =========================
+# MANIFESTS (likely contain absolute paths)
+# =========================
+manifests/
+
+# =========================
+# SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# SLURM logs
+slurm_logs/
+
+# Manual test outputs
+mini_test_outputs_manual/
