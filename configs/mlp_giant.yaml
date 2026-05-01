@@ -1,0 +1,72 @@
+# configs/mlp_giant.yaml
+#
+# Large symmetric MLP autoencoder at 256x256 input.
+#
+# Architecture: 65536 -> 8192 -> 1024 -> 128 -> 16 -> 128 -> 1024 -> 8192 -> 65536
+# Total parameters: 1,090,869,520 (1.09 billion)
+# Bottleneck dim: 16 (note: much smaller than trial 142's 240)
+#
+# This is roughly 7x the size of CNN trial 142 (142M params) and ~120x the
+# size of the previous MLP at 64x64 (9M params). With 722 healthy training
+# images that is ~1.5M parameters per training example -- deep into the
+# memorization regime even with regularization.
+#
+# This run is exploratory: we want to see what actually happens when we
+# scale an MLP to "as big as the GPU can hold" on this dataset. Predictions
+# (to be checked against actual results):
+#   - Training will run; ~50 sec/epoch on MI210; capped at 100 epochs.
+#   - Val loss will descend slower than train loss (overfitting).
+#   - Best-checkpoint val_loss will be lower than the 9M MLP's 0.000340.
+#   - Selection-set lcfs AUC will be 0.50-0.55 (random or worse) because
+#     the model memorizes healthy training images and reconstructs
+#     broken_lcfs by interpolation between memorized healthy patterns,
+#     which is the opposite of what the AE-as-anomaly-detector pattern needs.
+#
+# If actual lcfs is meaningfully different from this prediction (either
+# direction), that is itself an interesting result.
+
+# --- Model class
+model_type:        mlp
+mlp_input_size:    256              # MUST equal image_size
+mlp_hidden_sizes:  [8192, 1024, 128]   # encoder; decoder mirrors
+mlp_dropout:       0.3              # bumped from 0.1; model is far larger
+
+# --- Architecture (matches trial 142 where applicable)
+bottleneck_dim: 16                  # the "16" in the 65536->...->16->...->65536 chain
+use_batchnorm:  true
+
+# --- CNN-specific filler (unused for model_type=mlp; required by Config)
+n_enc_layers:   5
+n_dec_layers:   3
+base_channels:  45
+growth_factor:  2.420701279177553
+decoder_upsample: nearest
+
+# --- Preprocessing (matches trial 142)
+use_hpf:   true
+hpf_sigma: 1.0150899986921562
+
+# --- Training
+lr:         0.00022215300717804413  # trial 142's lr; not scaled for the larger model
+batch_size: 24
+max_epochs: 100                     # capped at 100 (estimated ~80 min on MI210)
+min_epochs: 30
+patience:   30
+
+# --- Reproducibility
+seed:          42
+deterministic: false
+
+# --- Paths
+manifests_dir: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests
+images_root:   /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots
+
+# --- Resolution
+crop_box:   [72, 28, 300, 500]
+image_size: 256
+
+# --- Score calibration
+score_k: 37.0
+
+# --- Output
+output_dir: mlp_giant_outputs

@@ -118,7 +118,8 @@ class Decoder(nn.Module):
                  channels:       List[int],        # same list encoder used
                  bottleneck_dim: int,
                  final_spatial:  int,
-                 use_batchnorm:  bool):
+                 use_batchnorm:  bool,
+                 upsample_mode:  str = "nearest"):
         super().__init__()
 
         # Dense layer to expand latent back to spatial feature map
@@ -137,7 +138,22 @@ class Decoder(nn.Module):
         # After the last upsample, we do a final 1x1 conv -> 1 channel + sigmoid.
         stages: List[nn.Module] = []
         for i in range(n_enc_layers):
-            stages.append(nn.Upsample(scale_factor=2, mode="nearest"))
+            # Channel count entering this upsample stage
+            # (must match stage_in_c logic below so shapes line up).
+            if i == 0:
+                up_c = channels[-1]
+            else:
+                up_c = channels[n_enc_layers - i]
+
+            if upsample_mode == "convtranspose":
+                # k=2, s=2, p=0  ->  output spatial = 2 * input spatial,
+                # exact mirror of MaxPool2d(2,2). Preserves channel count;
+                # the conv blocks that follow handle the channel reduction.
+                stages.append(nn.ConvTranspose2d(
+                    up_c, up_c, kernel_size=2, stride=2,
+                ))
+            else:
+                stages.append(nn.Upsample(scale_factor=2, mode="nearest"))
 
             # Target channel count for THIS decoder stage
             # (mirrored from encoder: stage 0 of decoder ~ last encoder channel,
@@ -205,6 +221,7 @@ class Autoencoder(nn.Module):
             bottleneck_dim = cfg.bottleneck_dim,
             final_spatial  = self.encoder.final_spatial,
             use_batchnorm  = cfg.use_batchnorm,
+            upsample_mode  = cfg.decoder_upsample,
         )
 
         self._channels = channels

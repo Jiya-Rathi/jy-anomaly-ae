@@ -1,0 +1,19 @@
+[worker 2 | 19:14:14] Starting with gpu_id=2, n_trials=2
+[worker 2 | 19:14:14] Study: name='ae_topology_minitest_v3', db=mini_test_outputs/study.db
+[worker 2 | 19:14:14] Output dir: mini_test_outputs
+[worker 2 | 19:14:14] HIP_VISIBLE_DEVICES set to 2
+[worker 2 | 19:14:33] torch sees 1 GPU(s); cuda_available=True
+[worker 2 | 19:14:33] Capped torch threads: num_threads=4, interop=2
+/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/ae_env/lib/python3.10/site-packages/optuna/_experimental.py:33: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  optuna_warn(
+/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/ae_env/lib/python3.10/site-packages/optuna/_experimental.py:33: ExperimentalWarning: Argument ``constant_liar`` is an experimental feature. The interface can change in the future.
+  optuna_warn(
+[I 2026-04-26 19:14:43,520] Using an existing study with name 'ae_topology_minitest_v3' instead of creating a new one.
+[worker 2 | 19:14:43] Resuming study 'ae_topology_minitest_v3' from mini_test_outputs/study.db
+[worker 2 | 19:14:43]   trials already on disk: 3 (completed or pruned: 0)
+[worker 2 | 19:14:43]   sampler : TPESampler(n_startup=20, seed=None, constant_liar=True, multivariate=True)
+[worker 2 | 19:14:43]   pruner  : MedianPruner(n_startup=20, n_warmup_steps=50)
+[worker 2 | 19:14:43] Entering study.optimize for 2 trials
+[I 2026-04-26 19:29:33,247] Trial 3 finished with value: 0.8236984840368902 and parameters: {'use_hpf': 1, 'use_batchnorm': 0, 'hpf_sigma': 3.2203817131146164, 'bottleneck_dim': 170, 'n_enc_layers': 4, 'n_dec_layers': 2, 'base_channels': 14, 'growth_factor': 2.832215362362356, 'lr': 9.59165935836126e-05, 'batch_size': 64}. Best is trial 3 with value: 0.8236984840368902.
+[I 2026-04-26 20:11:50,597] Trial 4 finished with value: 0.8200791065967359 and parameters: {'use_hpf': 1, 'use_batchnorm': 1, 'hpf_sigma': 7.955275446153699, 'bottleneck_dim': 168, 'n_enc_layers': 2, 'n_dec_layers': 2, 'base_channels': 61, 'growth_factor': 2.311568426523124, 'lr': 3.2341569867867075e-05, 'batch_size': 32}. Best is trial 1 with value: 0.830188137161386.
+[worker 2 | 20:11:51] Worker done. Study totals: complete=6, pruned=0, failed=0, all=7

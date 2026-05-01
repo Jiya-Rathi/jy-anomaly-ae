@@ -1,0 +1,91 @@
+[2026-04-27 04:34:28] ============================================================
+[2026-04-27 04:34:28] Trial 81 starting on cuda:0
+[2026-04-27 04:34:28] Timestamp: 2026-04-27T04:34:28.785186
+[2026-04-27 04:34:28] --- Config summary ---
+  bottleneck_dim  : 156
+  n_enc_layers    : 5
+  n_dec_layers    : 4
+  base_channels   : 60
+  growth_factor   : 1.9094019607432966
+  use_batchnorm   : True
+  use_hpf         : False
+  hpf_sigma       : 3.0
+  lr              : 7.35769072151147e-05
+  batch_size      : 24
+  max_epochs      : 300
+  patience        : 30
+  seed            : 42
+  deterministic   : False
+  trial_num       : 81
+[2026-04-27 04:34:28] Loading train/val/selection splits...
+[2026-04-27 04:35:27] Splits loaded in 59.0s: n_train=722, n_val=120, n_selection=405
+[2026-04-27 04:35:29] --- Architecture summary ---
+  channels per enc layer : [60, 115, 219, 418, 798]
+  final spatial size     : 8x8
+  flat size before latent: 51072
+  bottleneck_dim         : 156
+  total parameters       : 53,631,595
+[2026-04-27 04:35:29] Starting training: n_train=722, n_val=120, device=cuda:0
+[2026-04-27 04:38:40] epoch    1/300 | train=0.024309 | val=0.062713 | best=0.062713@1 | patience=0/30 | time=190.35s *
+[2026-04-27 04:38:51] epoch    2/300 | train=0.011886 | val=0.011002 | best=0.011002@2 | patience=0/30 | time=9.75s *
+[2026-04-27 04:39:02] epoch    3/300 | train=0.010345 | val=0.009354 | best=0.009354@3 | patience=0/30 | time=9.68s *
+[2026-04-27 04:39:13] epoch    4/300 | train=0.009497 | val=0.008482 | best=0.008482@4 | patience=0/30 | time=10.08s *
+[2026-04-27 04:39:23] epoch    5/300 | train=0.008348 | val=0.007819 | best=0.007819@5 | patience=0/30 | time=9.84s *
+[2026-04-27 04:39:33] epoch    6/300 | train=0.007549 | val=0.009417 | best=0.007819@5 | patience=1/30 | time=9.88s
+[2026-04-27 04:39:43] epoch    7/300 | train=0.007606 | val=0.008531 | best=0.007819@5 | patience=2/30 | time=9.97s
+[2026-04-27 04:39:54] epoch    8/300 | train=0.007262 | val=0.007269 | best=0.007269@8 | patience=0/30 | time=9.68s *
+[2026-04-27 04:40:05] epoch    9/300 | train=0.006762 | val=0.006228 | best=0.006228@9 | patience=0/30 | time=10.08s *
+[2026-04-27 04:40:15] epoch   10/300 | train=0.006172 | val=0.008281 | best=0.006228@9 | patience=1/30 | time=9.84s
+[2026-04-27 04:40:26] epoch   11/300 | train=0.006377 | val=0.006057 | best=0.006057@11 | patience=0/30 | time=9.64s *
+[2026-04-27 04:40:36] epoch   12/300 | train=0.005835 | val=0.006836 | best=0.006057@11 | patience=1/30 | time=9.75s
+[2026-04-27 04:40:46] epoch   13/300 | train=0.006140 | val=0.005763 | best=0.005763@13 | patience=0/30 | time=9.90s *
+[2026-04-27 04:40:57] epoch   14/300 | train=0.005559 | val=0.005757 | best=0.005757@14 | patience=0/30 | time=10.04s *
+[2026-04-27 04:41:07] epoch   15/300 | train=0.005462 | val=0.006700 | best=0.005757@14 | patience=1/30 | time=9.81s
+[2026-04-27 04:41:17] epoch   16/300 | train=0.005667 | val=0.006971 | best=0.005757@14 | patience=2/30 | time=9.71s
+[2026-04-27 04:41:27] epoch   17/300 | train=0.005617 | val=0.006610 | best=0.005757@14 | patience=3/30 | time=10.07s
+[2026-04-27 04:41:38] epoch   18/300 | train=0.005556 | val=0.005115 | best=0.005115@18 | patience=0/30 | time=9.87s *
+[2026-04-27 04:41:48] epoch   19/300 | train=0.005028 | val=0.005168 | best=0.005115@18 | patience=1/30 | time=9.88s
+[2026-04-27 04:41:58] epoch   20/300 | train=0.004761 | val=0.005138 | best=0.005115@18 | patience=2/30 | time=9.96s
+[2026-04-27 04:42:09] epoch   21/300 | train=0.005868 | val=0.005004 | best=0.005004@21 | patience=0/30 | time=9.68s *
+[2026-04-27 04:42:20] epoch   22/300 | train=0.005111 | val=0.004773 | best=0.004773@22 | patience=0/30 | time=10.05s *
+[2026-04-27 04:42:30] epoch   23/300 | train=0.004672 | val=0.023676 | best=0.004773@22 | patience=1/30 | time=9.87s
+[2026-04-27 04:42:40] epoch   24/300 | train=0.006591 | val=0.006063 | best=0.004773@22 | patience=2/30 | time=9.64s
+[2026-04-27 04:42:50] epoch   25/300 | train=0.005447 | val=0.004994 | best=0.004773@22 | patience=3/30 | time=10.03s
+[2026-04-27 04:43:00] epoch   26/300 | train=0.004978 | val=0.005442 | best=0.004773@22 | patience=4/30 | time=9.86s
+[2026-04-27 04:43:10] epoch   27/300 | train=0.005073 | val=0.005259 | best=0.004773@22 | patience=5/30 | time=9.89s
+[2026-04-27 04:43:20] epoch   28/300 | train=0.004502 | val=0.004875 | best=0.004773@22 | patience=6/30 | time=9.96s
+[2026-04-27 04:43:30] epoch   29/300 | train=0.004505 | val=0.005801 | best=0.004773@22 | patience=7/30 | time=9.69s
+[2026-04-27 04:43:41] epoch   30/300 | train=0.004291 | val=0.004509 | best=0.004509@30 | patience=0/30 | time=10.12s *
+[2026-04-27 04:43:51] epoch   31/300 | train=0.004068 | val=0.003921 | best=0.003921@31 | patience=0/30 | time=9.84s *
+[2026-04-27 04:44:01] epoch   32/300 | train=0.003914 | val=0.004189 | best=0.003921@31 | patience=1/30 | time=9.66s
+[2026-04-27 04:44:12] epoch   33/300 | train=0.003895 | val=0.003850 | best=0.003850@33 | patience=0/30 | time=10.09s *
+[2026-04-27 04:44:23] epoch   34/300 | train=0.003812 | val=0.003735 | best=0.003735@34 | patience=0/30 | time=9.84s *
+[2026-04-27 04:44:33] epoch   35/300 | train=0.003868 | val=0.004170 | best=0.003735@34 | patience=1/30 | time=9.93s
+[2026-04-27 04:44:43] epoch   36/300 | train=0.003734 | val=0.004898 | best=0.003735@34 | patience=2/30 | time=9.94s
+[2026-04-27 04:44:54] epoch   37/300 | train=0.003785 | val=0.003629 | best=0.003629@37 | patience=0/30 | time=9.72s *
+[2026-04-27 04:45:04] epoch   38/300 | train=0.003622 | val=0.003558 | best=0.003558@38 | patience=0/30 | time=10.03s *
+[2026-04-27 04:45:14] epoch   39/300 | train=0.003602 | val=0.003636 | best=0.003558@38 | patience=1/30 | time=9.87s
+[2026-04-27 04:45:24] epoch   40/300 | train=0.003627 | val=0.003635 | best=0.003558@38 | patience=2/30 | time=9.97s
+[2026-04-27 04:45:34] epoch   41/300 | train=0.003392 | val=0.003601 | best=0.003558@38 | patience=3/30 | time=9.75s
+[2026-04-27 04:45:45] epoch   42/300 | train=0.003287 | val=0.003225 | best=0.003225@42 | patience=0/30 | time=9.90s *
+[2026-04-27 04:45:55] epoch   43/300 | train=0.003449 | val=0.003634 | best=0.003225@42 | patience=1/30 | time=10.09s
+[2026-04-27 04:46:05] epoch   44/300 | train=0.003306 | val=0.003320 | best=0.003225@42 | patience=2/30 | time=9.79s
+[2026-04-27 04:46:15] epoch   45/300 | train=0.003129 | val=0.006450 | best=0.003225@42 | patience=3/30 | time=9.72s
+[2026-04-27 04:46:25] epoch   46/300 | train=0.005210 | val=0.004395 | best=0.003225@42 | patience=4/30 | time=10.12s
+[2026-04-27 04:46:35] epoch   47/300 | train=0.004049 | val=0.003550 | best=0.003225@42 | patience=5/30 | time=9.85s
+[2026-04-27 04:46:45] epoch   48/300 | train=0.003502 | val=0.003915 | best=0.003225@42 | patience=6/30 | time=9.90s
+[2026-04-27 04:46:55] epoch   49/300 | train=0.003446 | val=0.004001 | best=0.003225@42 | patience=7/30 | time=9.75s
+[2026-04-27 04:47:05] epoch   50/300 | train=0.003333 | val=0.003242 | best=0.003225@42 | patience=8/30 | time=9.87s
+[2026-04-27 04:47:05]   pruned at epoch 50
+[2026-04-27 04:47:05] Training done: stop_reason=pruned, total_epochs=50, best_epoch=42, best_val=0.003225
+[2026-04-27 04:47:05] Reloading best checkpoint (epoch 42) for evaluation
+[2026-04-27 04:47:25] ------------------------------------------------------------
+[2026-04-27 04:47:25] Evaluation:
+[2026-04-27 04:47:25]   AUC broken_lcfs         : 0.5055
+[2026-04-27 04:47:25]   AUC bad_black_core      : 0.9997
+[2026-04-27 04:47:25]   AUC bad_nonconverged    : 1.0000
+[2026-04-27 04:47:25]   objective      : 0.8021
+[2026-04-27 04:47:25]   floor_ok       : True
+[2026-04-27 04:47:25]   threshold      : 0.1242
+[2026-04-27 04:47:25]   mu / sigma     : 0.0030604 / 0.000933131
+[2026-04-27 04:47:25] Train time=696.0s, eval time=19.7s

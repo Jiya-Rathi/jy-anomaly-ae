@@ -1,0 +1,47 @@
+[2026-04-27 21:11:14] ============================================================
+[2026-04-27 21:11:14] Trial 999 starting on cuda:0
+[2026-04-27 21:11:14] Timestamp: 2026-04-27T21:11:14.746757
+[2026-04-27 21:11:14] --- Config summary ---
+  bottleneck_dim   : 32
+  n_enc_layers     : 3
+  n_dec_layers     : 2
+  base_channels    : 16
+  growth_factor    : 2.0
+  use_batchnorm    : True
+  use_hpf          : False
+  hpf_sigma        : 3.0
+  lr               : 0.001
+  batch_size       : 32
+  decoder_upsample : nearest
+  max_epochs       : 10
+  min_epochs       : 3
+  patience         : 5
+  seed             : 99
+  deterministic    : False
+  trial_num        : 999
+[2026-04-27 21:11:14] Loading train/val/selection splits...
+[2026-04-27 21:12:16] Splits loaded in 61.6s: n_train=722, n_val=120, n_selection=405
+[2026-04-27 21:12:16] --- Architecture summary ---
+  channels per enc layer : [16, 32, 64]
+  final spatial size     : 32x32
+  flat size before latent: 65536
+  bottleneck_dim         : 32
+  total parameters       : 4,392,369
+[2026-04-27 21:12:26] Starting training: n_train=722, n_val=120, device=cuda:0
+[2026-04-27 21:13:16] epoch    1/10 | train=0.037431 | val=0.032600 | best=0.032600@1 | patience=0/5 | time=50.39s *
+[2026-04-27 21:13:17] epoch    2/10 | train=0.015070 | val=0.013223 | best=0.013223@2 | patience=0/5 | time=0.99s *
+[2026-04-27 21:13:18] epoch    3/10 | train=0.011639 | val=0.010289 | best=0.010289@3 | patience=0/5 | time=0.98s *
+[2026-04-27 21:13:19] epoch    4/10 | train=0.010435 | val=0.009743 | best=0.009743@4 | patience=0/5 | time=0.98s *
+[2026-04-27 21:13:19]   pruned at epoch 4
+[2026-04-27 21:13:19] Training done: stop_reason=pruned, total_epochs=4, best_epoch=4, best_val=0.009743
+[2026-04-27 21:13:19] Reloading best checkpoint (epoch 4) for evaluation
+[2026-04-27 21:13:22] ------------------------------------------------------------
+[2026-04-27 21:13:22] Evaluation:
+[2026-04-27 21:13:22]   AUC broken_lcfs         : 0.4707
+[2026-04-27 21:13:22]   AUC bad_black_core      : 0.9950
+[2026-04-27 21:13:22]   AUC bad_nonconverged    : 0.9232
+[2026-04-27 21:13:22]   objective      : 0.7638
+[2026-04-27 21:13:22]   floor_ok       : True
+[2026-04-27 21:13:22]   threshold      : 0.0368
+[2026-04-27 21:13:22]   mu / sigma     : 0.00997338 / 0.00321282
+[2026-04-27 21:13:22] Train time=63.1s, eval time=2.6s

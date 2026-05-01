@@ -22,9 +22,8 @@ final_test_set/
 # =========================
 # EXPERIMENT OUTPUTS
 # =========================
-study_outputs/
-mini_test_outputs/
-baseline_outputs/
+*_outputs/
+mini_test_outputs_manual/
 
 # =========================
 # CHECKPOINTS / MODELS
@@ -59,5 +58,12 @@ Thumbs.db
 # SLURM logs
 slurm_logs/
 
-# Manual test outputs
-mini_test_outputs_manual/
+# =========================
+# Re-include logs inside any *_outputs folder
+# =========================
+!**/*_outputs/
+!**/*_outputs/logs/
+!**/*_outputs/logs/**
+!**/*_outputs/logs/*.log
+!**/*_outputs/logs/*.csv
+!**/*_outputs/logs/*.png

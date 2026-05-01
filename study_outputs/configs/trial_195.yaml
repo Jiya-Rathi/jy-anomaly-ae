@@ -1,0 +1,26 @@
+bottleneck_dim: 242
+n_enc_layers: 4
+n_dec_layers: 3
+base_channels: 55
+growth_factor: 1.8698199477806572
+use_batchnorm: true
+use_hpf: true
+hpf_sigma: 1.043193581465615
+lr: 0.008859199308298359
+batch_size: 16
+max_epochs: 300
+min_epochs: 30
+patience: 30
+seed: 42
+deterministic: false
+manifests_dir: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests
+images_root: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots
+crop_box:
+- 72
+- 28
+- 300
+- 500
+image_size: 256
+score_k: 37.0
+output_dir: outputs
+trial_num: 195

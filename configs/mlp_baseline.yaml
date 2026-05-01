@@ -1,0 +1,68 @@
+# configs/mlp_baseline.yaml
+#
+# First test of MLP autoencoder per professor suggestion.
+#
+# Hypothesis being tested: a fully-connected AE may detect broken_lcfs
+# better than the CNN AE because MLPs can learn pixel-position-specific
+# weights, whereas CNN kernels are translation-invariant.
+#
+# COMPARISON BASELINE: trial 142's hyperparameters re-run with 3 seeds
+# gave broken_lcfs AUC = 0.614 +/- 0.020 (with the CNN AE at 256x256).
+#
+# RESOLUTION NOTE: image_size=64 means the data pipeline produces 64x64
+# images and the loss is computed at 64x64. Setting image_size=256 with
+# mlp_input_size=64 caused a tensor-size mismatch in the training loss
+# (the model emits 64x64 but the target was 256x256). This config keeps
+# the resolution consistent end-to-end.
+#
+# An honest comparison vs the CNN study (which ran at 256x256) means
+# we're testing two things at once: architecture (CNN vs MLP) and
+# resolution (256 vs 64). If the MLP wins, we'd want a follow-up CNN
+# run at 64x64 to disentangle.
+
+# --- Model class
+model_type:        mlp
+mlp_input_size:    64           # must match image_size below
+mlp_hidden_sizes:  [1024, 256]  # 4096 -> 1024 -> 256 -> 240, then mirror back
+mlp_dropout:       0.1
+
+# --- Architecture (matches trial 142 where applicable)
+bottleneck_dim: 240
+use_batchnorm:  true
+
+# --- These CNN-specific fields are unused for model_type=mlp but Config
+#     requires them to be present. Use trial 142's values as harmless filler.
+n_enc_layers:   5
+n_dec_layers:   3
+base_channels:  45
+growth_factor:  2.420701279177553
+decoder_upsample: nearest
+
+# --- Preprocessing (matches trial 142)
+use_hpf:   true
+hpf_sigma: 1.0150899986921562
+
+# --- Training (matches trial 142)
+lr:         0.00022215300717804413
+batch_size: 24
+max_epochs: 300
+min_epochs: 30
+patience:   30
+
+# --- Reproducibility
+seed:          42
+deterministic: false
+
+# --- Paths
+manifests_dir: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests
+images_root:   /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots
+
+# --- Preprocessing constants
+crop_box:   [72, 28, 300, 500]
+image_size: 64                  # MUST equal mlp_input_size
+
+# --- Score calibration
+score_k: 37.0
+
+# --- Output
+output_dir: mlp_baseline_outputs

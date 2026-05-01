@@ -26,6 +26,15 @@ Either way, the five stages are the same:
     3. Load train/val/selection splits -- all preloaded to GPU.
     4. Build model, run the training loop.
     5. Evaluate on selection set, write summary row.
+
+MODEL-CLASS SWITCH (added 2026-04-28):
+    cfg.model_type selects between the existing CNN Autoencoder ("cnn",
+    default) and the fully-connected MLPAutoencoder ("mlp"). The MLP
+    variant was added per professor suggestion to test whether the
+    convolutional inductive bias is what's limiting broken_lcfs detection.
+    Both model classes expose forward() and reconstruction_error() with
+    the same signatures, so training/evaluation/scoring downstream is
+    unchanged.
 """
 
 import argparse
@@ -72,6 +81,39 @@ def _set_seeds(seed: int, deterministic: bool = False) -> None:
         if hasattr(torch.backends, "cudnn"):
             torch.backends.cudnn.deterministic = True
             torch.backends.cudnn.benchmark     = False
+
+
+# -----------------------------------------------------------------------------
+# Model build switch
+# -----------------------------------------------------------------------------
+
+def _build_model(cfg, device):
+    """Construct the model selected by cfg.model_type and move to device.
+
+    Returns (model, summary_str). summary_str is a short multi-line
+    description suitable for log_fn(); for the CNN path it comes from
+    Autoencoder.architecture_summary(), for the MLP path we build it
+    here since MLPAutoencoder doesn't have that method.
+    """
+    model_type = getattr(cfg, "model_type", "cnn")
+
+    if model_type == "mlp":
+        # Imported lazily so the CNN path doesn't pay the cost on every run.
+        from ae_lib.model_mlp import build_mlp_from_config
+        model = build_mlp_from_config(cfg).to(device)
+        summary = (
+            "Model: MLPAutoencoder\n"
+            f"  input_size     : {model.input_size}x{model.input_size} "
+            f"(downsampled from {cfg.image_size})\n"
+            f"  hidden_sizes   : {model.hidden_sizes}\n"
+            f"  bottleneck_dim : {model.bottleneck_dim}\n"
+            f"  parameters     : {model.parameter_count():,}"
+        )
+        return model, summary
+
+    # Default path: existing CNN Autoencoder. Behavior unchanged.
+    model = Autoencoder(cfg).to(device)
+    return model, model.architecture_summary()
 
 
 # -----------------------------------------------------------------------------
@@ -178,9 +220,9 @@ def train_one_model(
             f"n_selection={len(selection_data)}"
         )
 
-        # --- Build model
-        model = Autoencoder(cfg).to(device)
-        log_fn(model.architecture_summary())
+        # --- Build model (CNN or MLP, selected by cfg.model_type)
+        model, model_summary = _build_model(cfg, device)
+        log_fn(model_summary)
 
         # --- Train
         t0 = time.time()
@@ -231,6 +273,12 @@ def train_one_model(
         log_fn(f"Train time={train_time:.1f}s, eval time={eval_time:.1f}s")
 
         # --- Append one row to summary.csv
+        # NOTE: For model_type="mlp" runs, the CNN-architecture columns
+        # (n_enc_layers, n_dec_layers, base_channels, growth_factor) carry
+        # filler values from the YAML and are not meaningful. The
+        # bottleneck_dim and use_batchnorm columns ARE meaningful for both.
+        # If MLP runs become a regular thing, extend SUMMARY_FIELDS to
+        # add model_type and the mlp_* columns.
         _append_summary(
             summary_path = paths.summary,
             trial_num    = trial_num,

@@ -1,0 +1,63 @@
+# configs/old_baseline.yaml
+#
+# Faithful YAML reproduction of the historical hyperparameters from
+# Section 12 of PROJECT_HANDOFF.txt, NOW INCLUDING the ConvTranspose2d
+# decoder used by the old AE_ablation_studies code.
+#
+# Previous YAML-only run (nearest-neighbor decoder, otherwise identical):
+#   broken_lcfs AUC = 0.5646  (BELOW the study mean of 0.598 for HPF trials)
+#
+# Old AE_ablation_studies result (ConvTranspose2d, 216 healthy train, 0.2 val
+# split, no separate selection set):
+#   broken_lcfs AUC = 0.897
+#
+# This run isolates the decoder mechanism. Holds constant vs the previous run:
+#   - hyperparameters
+#   - manifest split (722/120/405)
+#   - training set size (722 healthy)
+#   - selection-set evaluation
+# Changes only:
+#   - decoder upsample: nearest+conv -> ConvTranspose2d(C, C, k=2, s=2)
+#
+# If lcfs jumps significantly, the upsample mechanism explains the gap.
+# If lcfs stays near 0.56, gap is in the data/selection split, not the model.
+
+# --- Architecture
+bottleneck_dim: 128
+n_enc_layers:   4
+n_dec_layers:   4
+base_channels:  16
+growth_factor:  2.0
+use_batchnorm:  false
+
+# --- Decoder upsample (NEW FIELD, requires config.py + model.py edits)
+decoder_upsample: convtranspose
+
+# --- Preprocessing
+use_hpf:   true
+hpf_sigma: 3.0
+
+# --- Training
+lr:         1.0e-3
+batch_size: 16
+max_epochs: 100
+min_epochs: 3
+patience:   3
+
+# --- Reproducibility
+seed:          42
+deterministic: false
+
+# --- Paths
+manifests_dir: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests
+images_root:   /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots
+
+# --- Preprocessing constants
+crop_box:   [72, 28, 300, 500]
+image_size: 256
+
+# --- Score calibration
+score_k: 37.0
+
+# --- Output
+output_dir: old_baseline_convt_outputs

@@ -1,0 +1,55 @@
+# configs/trial_142_seed137.yaml
+#
+# Re-train trial 142's exact config with a different seed to measure
+# seed-to-seed variance in broken_lcfs AUC.
+#
+# Trial 142 (study, seed=42) achieved:
+#   broken_lcfs AUC = 0.6881
+#   bad_black_core  = 0.9775
+#   bad_nonconverged = 0.9953
+#   objective       = 0.8671
+#
+# If the three seeds give lcfs spread <= 0.04, the 0.688 number is reliable
+# and 0.69 is genuinely the model's ceiling on this task.
+# If spread is 0.10+, individual trial AUCs are too noisy to trust and
+# the study results need re-thinking.
+
+# --- Architecture (trial 142 exactly)
+bottleneck_dim: 240
+n_enc_layers:   5
+n_dec_layers:   3
+base_channels:  45
+growth_factor:  2.420701279177553
+use_batchnorm:  true
+
+# Use current default decoder; we already showed ConvT doesn't help here.
+decoder_upsample: nearest
+
+# --- Preprocessing (trial 142 exactly)
+use_hpf:   true
+hpf_sigma: 1.0150899986921562
+
+# --- Training (trial 142 exactly)
+lr:         0.00022215300717804413
+batch_size: 24
+max_epochs: 300       # match study budget; trial 142 was pruned at 60
+min_epochs: 30        # match study default
+patience:   30        # match study default
+
+# --- Reproducibility (THE ONE THING THAT CHANGES)
+seed:          137
+deterministic: false
+
+# --- Paths
+manifests_dir: /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests
+images_root:   /mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots
+
+# --- Preprocessing constants
+crop_box:   [72, 28, 300, 500]
+image_size: 256
+
+# --- Score calibration
+score_k: 37.0
+
+# --- Output
+output_dir: seed_variance_outputs

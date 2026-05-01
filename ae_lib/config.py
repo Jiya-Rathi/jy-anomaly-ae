@@ -17,7 +17,7 @@ The dict form is what Optuna will use. Both paths go through the same
 validation so a bad value gets caught the same way.
 """
 
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Optional
 import yaml
@@ -31,14 +31,14 @@ import yaml
 # it. When loading from YAML, this also catches typos in the config file.
 
 _VALID_RANGES = {
-    "bottleneck_dim":   (16, 256),
-    "n_enc_layers":     (2, 5),
-    "n_dec_layers":     (2, 5),
-    "base_channels":    (8, 64),
-    "growth_factor":    (1.5, 3.0),
-    "lr":               (1e-5, 1e-2),
-    "batch_size":       (8, 64),
-    "hpf_sigma":        (1.0, 8.0),
+    "bottleneck_dim": (16, 256),
+    "n_enc_layers": (2, 5),
+    "n_dec_layers": (2, 5),
+    "base_channels": (8, 64),
+    "growth_factor": (1.5, 3.0),
+    "lr": (1e-5, 1e-2),
+    "batch_size": (8, 64),
+    "hpf_sigma": (1.0, 8.0),
 }
 
 
@@ -52,7 +52,7 @@ class Config:
 
     # --- Architecture
     #
-    # The AE has a flat-vector bottleneck (Option 2 design):
+    # For CNN mode:
     #   encoder: n_enc_layers downsample blocks, each halving spatial size
     #            -> flatten -> dense layer -> [batch, bottleneck_dim]
     #   decoder: dense layer -> unflatten -> n_enc_layers upsample blocks
@@ -65,41 +65,68 @@ class Config:
     # base_channels and growth_factor together define channel counts:
     #   layer i has channels = base_channels * growth_factor**i, rounded.
     bottleneck_dim: int
-    n_enc_layers:   int
-    n_dec_layers:   int
-    base_channels:  int
-    growth_factor:  float
-    use_batchnorm:  bool
+    n_enc_layers: int
+    n_dec_layers: int
+    base_channels: int
+    growth_factor: float
+    use_batchnorm: bool
 
     # --- Preprocessing
-    use_hpf:   bool
-    hpf_sigma: float           # ignored if use_hpf is False
+    use_hpf: bool
+    hpf_sigma: float  # ignored if use_hpf is False
 
     # --- Training
-    lr:          float
-    batch_size:  int
-    max_epochs:  int = 300
-    min_epochs:  int = 30
-    patience:    int = 30      # early stopping patience on val loss
+    lr: float
+    batch_size: int
+
+    # --- Model class
+    # "cnn" : the existing CNN Autoencoder (default)
+    # "mlp" : MLPAutoencoder from model_mlp.py
+    model_type: str = "cnn"
+
+    # --- MLP-specific (only used if model_type == "mlp")
+    mlp_input_size: int = 64
+    mlp_hidden_sizes: list = None   # filled in __post_init__
+    mlp_dropout: float = 0.1
+
+    # --- Decoder upsample mechanism (CNN only)
+    # "nearest"      : nn.Upsample(scale_factor=2, mode="nearest") + conv blocks
+    #                  (current default; avoids checkerboard artifacts)
+    # "convtranspose": nn.ConvTranspose2d(C, C, kernel_size=2, stride=2)
+    #                  (learnable drop-in upsampler; matches old AE code)
+    decoder_upsample: str = "nearest"
+
+    # --- Training schedule
+    max_epochs: int = 300
+    min_epochs: int = 30
+    patience: int = 30  # early stopping patience on val loss
 
     # --- Reproducibility
-    seed:          int  = 42
-    deterministic: bool = False   # set True for final reference retrain
+    seed: int = 42
+    deterministic: bool = False  # set True for final reference retrain
 
     # --- Data paths
-    manifests_dir:   str = "/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests"
-    images_root:     str = "/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots"
+    manifests_dir: str = "/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/manifests"
+    images_root: str = "/mnt/beegfs/mantis/jrathi/AE_Model_Thesis/AEModel_jy_screenshots"
 
     # --- Preprocessing constants (not hyperparameters; same across all trials)
-    crop_box:   tuple = (72, 28, 300, 500)   # (left, top, right, bottom)
-    image_size: int   = 256
+    crop_box: tuple = (72, 28, 300, 500)  # (left, top, right, bottom)
+    image_size: int = 256
 
     # --- Anomaly score calibration
-    score_k: float = 37.0      # see research notes -- calibrated to saturate at max anomaly
+    score_k: float = 37.0  # calibrated to saturate near max anomaly
 
     # --- Output
-    output_dir:  str           = "outputs"
-    trial_num:   Optional[int] = None   # set by tune.py, None for manual CLI runs
+    output_dir: str = "outputs"
+    trial_num: Optional[int] = None  # set by tune.py, None for manual CLI runs
+
+    # -------------------------------------------------------------------------
+    # Dataclass post-init
+    # -------------------------------------------------------------------------
+
+    def __post_init__(self):
+        if self.mlp_hidden_sizes is None:
+            self.mlp_hidden_sizes = [1024, 256]
 
     # -------------------------------------------------------------------------
     # Constructors
@@ -119,7 +146,7 @@ class Config:
         path = Path(path)
         if not path.is_file():
             raise FileNotFoundError(f"config file not found: {path}")
-        with open(path) as f:
+        with open(path, "r") as f:
             d = yaml.safe_load(f)
         if not isinstance(d, dict):
             raise ValueError(f"config file {path} did not parse to a dict")
@@ -131,6 +158,7 @@ class Config:
 
     def _validate(self):
         """Sanity-check every field. Raises ValueError on any problem."""
+
         # Check range-bounded numeric fields
         for name, (lo, hi) in _VALID_RANGES.items():
             val = getattr(self, name)
@@ -138,6 +166,48 @@ class Config:
                 raise ValueError(
                     f"{name}={val} is outside valid range [{lo}, {hi}]"
                 )
+
+        # Model type
+        if self.model_type not in ("cnn", "mlp"):
+            raise ValueError(
+                f"model_type={self.model_type!r} must be 'cnn' or 'mlp'"
+            )
+
+        # Decoder upsample mode
+        if self.decoder_upsample not in ("nearest", "convtranspose"):
+            raise ValueError(
+                f"decoder_upsample={self.decoder_upsample!r} must be "
+                f"'nearest' or 'convtranspose'"
+            )
+
+        # MLP-specific checks
+        if self.mlp_input_size < 1:
+            raise ValueError(f"mlp_input_size must be >= 1, got {self.mlp_input_size}")
+
+        if not isinstance(self.mlp_hidden_sizes, list) or len(self.mlp_hidden_sizes) == 0:
+            raise ValueError(
+                f"mlp_hidden_sizes must be a non-empty list, got {self.mlp_hidden_sizes!r}"
+            )
+
+        for i, h in enumerate(self.mlp_hidden_sizes):
+            if not isinstance(h, int) or h < 1:
+                raise ValueError(
+                    f"mlp_hidden_sizes[{i}] must be a positive int, got {h!r}"
+                )
+
+        if not (0.0 <= self.mlp_dropout < 1.0):
+            raise ValueError(
+                f"mlp_dropout must be in [0, 1), got {self.mlp_dropout}"
+            )
+
+        # MLP resolution must match data resolution
+        if self.model_type == "mlp" and self.mlp_input_size != self.image_size:
+            raise ValueError(
+                f"For model_type='mlp', mlp_input_size ({self.mlp_input_size}) "
+                f"must equal image_size ({self.image_size}). The data pipeline "
+                f"produces images at image_size, and the training loss is computed "
+                f"at that resolution."
+            )
 
         # Training schedule sanity
         if self.min_epochs > self.max_epochs:
@@ -164,9 +234,18 @@ class Config:
         if r <= l or b <= t:
             raise ValueError(f"invalid crop_box: {self.crop_box}")
 
-        # Image size
+        # Image size sanity
         if self.image_size < 32 or self.image_size > 1024:
             raise ValueError(f"image_size {self.image_size} looks wrong")
+
+        # CNN-only downsampling sanity
+        if self.model_type == "cnn":
+            bottleneck_spatial = self.image_size // (2 ** self.n_enc_layers)
+            if bottleneck_spatial < 1 or self.image_size % (2 ** self.n_enc_layers) != 0:
+                raise ValueError(
+                    f"image_size={self.image_size} is incompatible with "
+                    f"n_enc_layers={self.n_enc_layers}"
+                )
 
     # -------------------------------------------------------------------------
     # Utility
@@ -186,20 +265,26 @@ class Config:
         """Short human-readable summary, one line per important field."""
         lines = [
             "--- Config summary ---",
-            f"  bottleneck_dim  : {self.bottleneck_dim}",
-            f"  n_enc_layers    : {self.n_enc_layers}",
-            f"  n_dec_layers    : {self.n_dec_layers}",
-            f"  base_channels   : {self.base_channels}",
-            f"  growth_factor   : {self.growth_factor}",
-            f"  use_batchnorm   : {self.use_batchnorm}",
-            f"  use_hpf         : {self.use_hpf}",
-            f"  hpf_sigma       : {self.hpf_sigma}",
-            f"  lr              : {self.lr}",
-            f"  batch_size      : {self.batch_size}",
-            f"  max_epochs      : {self.max_epochs}",
-            f"  patience        : {self.patience}",
-            f"  seed            : {self.seed}",
-            f"  deterministic   : {self.deterministic}",
-            f"  trial_num       : {self.trial_num}",
+            f"  model_type        : {self.model_type}",
+            f"  bottleneck_dim    : {self.bottleneck_dim}",
+            f"  n_enc_layers      : {self.n_enc_layers}",
+            f"  n_dec_layers      : {self.n_dec_layers}",
+            f"  base_channels     : {self.base_channels}",
+            f"  growth_factor     : {self.growth_factor}",
+            f"  use_batchnorm     : {self.use_batchnorm}",
+            f"  mlp_input_size    : {self.mlp_input_size}",
+            f"  mlp_hidden_sizes  : {self.mlp_hidden_sizes}",
+            f"  mlp_dropout       : {self.mlp_dropout}",
+            f"  use_hpf           : {self.use_hpf}",
+            f"  hpf_sigma         : {self.hpf_sigma}",
+            f"  lr                : {self.lr}",
+            f"  batch_size        : {self.batch_size}",
+            f"  decoder_upsample  : {self.decoder_upsample}",
+            f"  max_epochs        : {self.max_epochs}",
+            f"  min_epochs        : {self.min_epochs}",
+            f"  patience          : {self.patience}",
+            f"  seed              : {self.seed}",
+            f"  deterministic     : {self.deterministic}",
+            f"  trial_num         : {self.trial_num}",
         ]
         return "\n".join(lines)
