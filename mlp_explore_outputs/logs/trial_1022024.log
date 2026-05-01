@@ -1,0 +1,36 @@
+[2026-05-01 14:53:18] ============================================================
+[2026-05-01 14:53:18] Trial 1022024 starting on cuda:0
+[2026-05-01 14:53:18] Timestamp: 2026-05-01T14:53:18.742241
+[2026-05-01 14:53:18] --- Config summary ---
+  model_type        : mlp
+  bottleneck_dim    : 64
+  n_enc_layers      : 5
+  n_dec_layers      : 3
+  base_channels     : 45
+  growth_factor     : 2.420701279177553
+  use_batchnorm     : False
+  mlp_input_size    : 256
+  mlp_hidden_sizes  : [16384, 4096, 1024]
+  mlp_dropout       : 0.3
+  use_hpf           : True
+  hpf_sigma         : 1.0150899986921562
+  lr                : 0.00022215300717804413
+  batch_size        : 24
+  decoder_upsample  : nearest
+  max_epochs        : 100
+  min_epochs        : 30
+  patience          : 30
+  seed              : 2024
+  deterministic     : False
+  trial_num         : 1022024
+[2026-05-01 14:53:18] Loading train/val/selection splits...
+[2026-05-01 14:54:22] Splits loaded in 64.2s: n_train=722, n_val=120, n_selection=405
+[2026-05-01 14:56:19] Model: MLPAutoencoder
+  input_size     : 256x256 (downsampled from 256)
+  hidden_sizes   : [16384, 4096, 1024]
+  bottleneck_dim : 64
+  parameters     : 2,290,329,664
+[2026-05-01 14:56:30] Starting training: n_train=722, n_val=120, device=cuda:0
+[2026-05-01 14:58:29] epoch    1/100 | train=0.002685 | val=0.001445 | best=0.001445@1 | patience=0/30 | time=53.23s *
+[2026-05-01 14:59:46] epoch    2/100 | train=0.001452 | val=0.001395 | best=0.001395@2 | patience=0/30 | time=11.12s *
+[2026-05-01 15:01:05] epoch    3/100 | train=0.001442 | val=0.001391 | best=0.001391@3 | patience=0/30 | time=11.49s *

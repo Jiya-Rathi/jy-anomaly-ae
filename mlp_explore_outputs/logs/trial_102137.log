@@ -1,0 +1,43 @@
+[2026-05-01 14:48:54] ============================================================
+[2026-05-01 14:48:54] Trial 102137 starting on cuda:0
+[2026-05-01 14:48:54] Timestamp: 2026-05-01T14:48:54.170431
+[2026-05-01 14:48:54] --- Config summary ---
+  model_type        : mlp
+  bottleneck_dim    : 64
+  n_enc_layers      : 5
+  n_dec_layers      : 3
+  base_channels     : 45
+  growth_factor     : 2.420701279177553
+  use_batchnorm     : False
+  mlp_input_size    : 256
+  mlp_hidden_sizes  : [16384, 4096, 1024]
+  mlp_dropout       : 0.3
+  use_hpf           : True
+  hpf_sigma         : 1.0150899986921562
+  lr                : 0.00022215300717804413
+  batch_size        : 24
+  decoder_upsample  : nearest
+  max_epochs        : 100
+  min_epochs        : 30
+  patience          : 30
+  seed              : 137
+  deterministic     : False
+  trial_num         : 102137
+[2026-05-01 14:48:54] Loading train/val/selection splits...
+[2026-05-01 14:49:58] Splits loaded in 64.4s: n_train=722, n_val=120, n_selection=405
+[2026-05-01 14:51:56] Model: MLPAutoencoder
+  input_size     : 256x256 (downsampled from 256)
+  hidden_sizes   : [16384, 4096, 1024]
+  bottleneck_dim : 64
+  parameters     : 2,290,329,664
+[2026-05-01 14:52:05] Starting training: n_train=722, n_val=120, device=cuda:0
+[2026-05-01 14:54:06] epoch    1/100 | train=0.002689 | val=0.001473 | best=0.001473@1 | patience=0/30 | time=53.94s *
+[2026-05-01 14:55:23] epoch    2/100 | train=0.001457 | val=0.001391 | best=0.001391@2 | patience=0/30 | time=11.28s *
+[2026-05-01 14:55:34] epoch    3/100 | train=0.001435 | val=0.001428 | best=0.001391@2 | patience=1/30 | time=11.26s
+[2026-05-01 14:55:46] epoch    4/100 | train=0.001437 | val=0.001400 | best=0.001391@2 | patience=2/30 | time=11.46s
+[2026-05-01 14:57:05] epoch    5/100 | train=0.001430 | val=0.001385 | best=0.001385@5 | patience=0/30 | time=11.33s *
+[2026-05-01 14:57:16] epoch    6/100 | train=0.001424 | val=0.001430 | best=0.001385@5 | patience=1/30 | time=11.25s
+[2026-05-01 14:57:28] epoch    7/100 | train=0.001427 | val=0.001404 | best=0.001385@5 | patience=2/30 | time=11.40s
+[2026-05-01 14:58:45] epoch    8/100 | train=0.001416 | val=0.001368 | best=0.001368@8 | patience=0/30 | time=11.26s *
+[2026-05-01 15:00:02] epoch    9/100 | train=0.001406 | val=0.001362 | best=0.001362@9 | patience=0/30 | time=11.45s *
+[2026-05-01 15:01:20] epoch   10/100 | train=0.001387 | val=0.001347 | best=0.001347@10 | patience=0/30 | time=11.50s *
