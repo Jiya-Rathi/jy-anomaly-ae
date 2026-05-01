@@ -38,6 +38,7 @@ checkpoints/
 *.log
 *.csv
 *.png
+summary.csv.lock
 
 # =========================
 # MANIFESTS (likely contain absolute paths)
