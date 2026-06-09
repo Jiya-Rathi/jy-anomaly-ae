@@ -171,7 +171,6 @@ SUMMARY_FIELDS: List[str] = [
     "sigma",
     # Hyperparameters (echoed for quick scanning)
     "use_hpf",
-    "use_lcfs_masking",
     "hpf_sigma",
     "bottleneck_dim",
     "n_enc_layers",

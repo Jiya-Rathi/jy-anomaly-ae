@@ -169,7 +169,11 @@ def train_model(
         log_fn = print
 
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.lr)
-    loss_fn   = nn.MSELoss(reduction="mean")
+    if cfg.loss_fn == "ssim":
+        from ae_lib.losses import SSIMLoss
+        loss_fn = SSIMLoss()
+    else:
+        loss_fn = nn.MSELoss(reduction="mean")
 
     # Index shuffle uses a deterministic generator tied to the seed.
     # This way, two trials with the same seed see the same shuffle order.

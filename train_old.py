@@ -260,11 +260,6 @@ def train_one_model(
             scatter_title  = scatter_title,
         )
         eval_time = time.time() - t0
-        # Expose training-outcome fields so objectives can apply a validity
-        # guard (detect never-trained epoch-1 collapses).
-        result.best_epoch   = history.best_epoch
-        result.total_epochs = history.total_epochs
-        result.stop_reason  = history.stop_reason
 
         # --- Log evaluation summary
         log_fn("-" * 60)
@@ -323,7 +318,6 @@ def _append_summary(summary_path, trial_num, cfg, history, result, paths):
         "sigma":              f"{result.sigma:.8g}",
         # Hyperparameters
         "use_hpf":            cfg.use_hpf,
-        "use_lcfs_masking":   cfg.use_lcfs_masking,
         "hpf_sigma":          cfg.hpf_sigma,
         "bottleneck_dim":     cfg.bottleneck_dim,
         "n_enc_layers":       cfg.n_enc_layers,

@@ -32,6 +32,9 @@ from typing import Callable
 
 import optuna
 
+from tune_lib.search_space import suggest_config
+
+
 # -----------------------------------------------------------------------------
 # Main objective
 # -----------------------------------------------------------------------------
@@ -40,7 +43,6 @@ def make_objective(
     gpu_id:         int,
     output_dir:     str,
     train_one_model: Callable,
-    suggest_fn=None,
 ) -> Callable:
     """Build the Optuna objective function for one worker.
 
@@ -58,9 +60,6 @@ def make_objective(
     train_one_model : callable
         The train.train_one_model function. Passed in so this module
         doesn't depend on the top-level train.py import path.
-    suggest_fn : callable, optional
-        Hyperparameter suggestion function. If None, uses
-        tune_lib.search_space.suggest_config.
 
     Returns
     -------
@@ -69,13 +68,9 @@ def make_objective(
     """
     output_dir = str(output_dir)
 
-    if suggest_fn is None:
-        from tune_lib.search_space import suggest_config
-        suggest_fn = suggest_config
-
     def objective(trial: optuna.Trial) -> float:
         # Sample hyperparameters
-        config = suggest_fn(trial)
+        config = suggest_config(trial)
 
         # Flag closure: captures whether the pruner requested a stop.
         # Lists are used instead of booleans so the inner callback can mutate.

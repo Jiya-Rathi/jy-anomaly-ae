@@ -79,15 +79,6 @@ class Config:
     lr: float
     batch_size: int
 
-    # --- LCFS masking preprocessing
-    # Must sit here (after all required fields, before all defaulted fields)
-    use_lcfs_masking: bool = False
-    sol_file_path:    str  = ""    # required when use_lcfs_masking=True
-
-    # --- Loss and anomaly-score functions
-    loss_fn:  str = "mse"     # "mse" or "ssim" -- training reconstruction loss
-    score_fn: str = "mse"     # "mse" or "ssim" -- anomaly score at evaluation
-
     # --- Model class
     # "cnn" : the existing CNN Autoencoder (default)
     # "mlp" : MLPAutoencoder from model_mlp.py
@@ -218,28 +209,6 @@ class Config:
                 f"at that resolution."
             )
 
-        # Loss / score function
-        if self.loss_fn not in ("mse", "ssim"):
-            raise ValueError(f"loss_fn must be 'mse' or 'ssim', got {self.loss_fn!r}")
-        if self.score_fn not in ("mse", "ssim"):
-            raise ValueError(f"score_fn must be 'mse' or 'ssim', got {self.score_fn!r}")
-
-        # LCFS masking
-        if self.use_lcfs_masking:
-            if self.use_hpf:
-                raise ValueError(
-                    "use_lcfs_masking and use_hpf cannot both be True. "
-                    "HPF is not meaningful on multi-level masked images."
-                )
-            if not self.sol_file_path:
-                raise ValueError(
-                    "sol_file_path must be set when use_lcfs_masking=True"
-                )
-            if not Path(self.sol_file_path).is_file():
-                raise FileNotFoundError(
-                    f"sol_file_path not found: {self.sol_file_path}"
-                )
-
         # Training schedule sanity
         if self.min_epochs > self.max_epochs:
             raise ValueError(
@@ -307,10 +276,6 @@ class Config:
             f"  mlp_hidden_sizes  : {self.mlp_hidden_sizes}",
             f"  mlp_dropout       : {self.mlp_dropout}",
             f"  use_hpf           : {self.use_hpf}",
-            f"  use_lcfs_masking  : {self.use_lcfs_masking}",
-            f"  sol_file_path     : {self.sol_file_path}",
-            f"  loss_fn           : {self.loss_fn}",
-            f"  score_fn          : {self.score_fn}",
             f"  hpf_sigma         : {self.hpf_sigma}",
             f"  lr                : {self.lr}",
             f"  batch_size        : {self.batch_size}",

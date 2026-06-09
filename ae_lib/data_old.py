@@ -85,33 +85,13 @@ def _shot_from_path(rel_path: str) -> str:
 # CPU preprocessing per image
 # -----------------------------------------------------------------------------
 
-def _preprocess_one(
-    path: Path,
-    crop_box: tuple,
-    image_size: int,
-    sol_coords=None,
-) -> np.ndarray:
-    """Load image from disk and apply the configured preprocessing path.
+def _preprocess_one(path: Path, crop_box: tuple, image_size: int) -> np.ndarray:
+    """Load image from disk, crop/resize/grayscale/normalize.
 
     Returns a float32 numpy array of shape [1, H, W] with values in [0, 1].
     """
-    if sol_coords is not None:
-        # -- LCFS masking path -------------------------------------------------
-        from ae_lib.lcfs_masking import apply_lcfs_masking
-
-        x0, y0, x1, y1 = crop_box
-        img_rgb = np.array(Image.open(path).convert("RGB"))
-        cropped_rgb = img_rgb[y0:y1, x0:x1]           # [H, W, 3]
-        masked = apply_lcfs_masking(cropped_rgb, sol_coords)  # [H, W] uint8
-        img = Image.fromarray(masked, mode="L")
-        img = img.resize((image_size, image_size),
-                         resample=Image.BILINEAR)
-        arr = np.asarray(img, dtype=np.float32) / 255.0
-        return arr[np.newaxis, :, :]                  # [1, H, W]
-
-    # -- Existing raw-image path ---------------------------------------------
     img = Image.open(path)
-    img = img.crop(crop_box)                          # (left, top, right, bottom)
+    img = img.crop(crop_box)                         # (left, top, right, bottom)
     img = img.resize((image_size, image_size),
                      resample=Image.BILINEAR)
     img = img.convert("L")                            # grayscale, single channel
@@ -192,12 +172,6 @@ def load_split(manifest_path, cfg, device) -> SplitData:
 
     images_root = Path(cfg.images_root)
 
-    # Load SOL coordinates once if LCFS masking is enabled
-    sol_coords = None
-    if cfg.use_lcfs_masking:
-        from ae_lib.lcfs_masking import load_sol_coords
-        sol_coords = load_sol_coords(cfg.sol_file_path)
-
     # --- CPU preprocessing: accumulate arrays one at a time
     arrs    = []
     classes = []
@@ -209,7 +183,7 @@ def load_split(manifest_path, cfg, device) -> SplitData:
             raise FileNotFoundError(
                 f"image listed in manifest but not on disk: {full}"
             )
-        arrs.append(_preprocess_one(full, cfg.crop_box, cfg.image_size, sol_coords))
+        arrs.append(_preprocess_one(full, cfg.crop_box, cfg.image_size))
         classes.append(cls)
         shots.append(_shot_from_path(rel))
         paths.append(rel)

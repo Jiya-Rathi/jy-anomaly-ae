@@ -76,23 +76,32 @@ class EvalResult:
 # Scoring helpers
 # -----------------------------------------------------------------------------
 
-def _per_sample_mse(model, images: torch.Tensor, batch_size: int) -> np.ndarray:
-    """Compute reconstruction MSE per image. Returns a 1D numpy array."""
+def _per_sample_mse(
+    model, images: torch.Tensor, batch_size: int, score_fn: str = "mse"
+) -> np.ndarray:
+    """Compute per-image reconstruction score. Returns a 1D numpy array."""
     model.eval()
     errors = []
     with torch.no_grad():
         for start in range(0, images.shape[0], batch_size):
             batch = images[start : start + batch_size]
-            e     = model.reconstruction_error(batch)   # [B]
+            if score_fn == "ssim":
+                from ae_lib.losses import per_sample_dssim
+                recon = model(batch)
+                if isinstance(recon, (tuple, list)):
+                    recon = recon[0]
+                e = per_sample_dssim(batch, recon)
+            else:
+                e = model.reconstruction_error(batch)   # [B]
             errors.append(e.detach().cpu().numpy())
     return np.concatenate(errors, axis=0)
 
 
 def compute_calibration(
-    model, train_images: torch.Tensor, batch_size: int, device,
+    model, train_images: torch.Tensor, batch_size: int, device, score_fn: str = "mse",
 ) -> Dict[str, float]:
-    """Compute mu and sigma of reconstruction MSE on healthy training set."""
-    mse = _per_sample_mse(model, train_images, batch_size)
+    """Compute mu and sigma of reconstruction score on healthy training set."""
+    mse = _per_sample_mse(model, train_images, batch_size, score_fn=score_fn)
     mu    = float(mse.mean())
     sigma = float(mse.std())
     # Guard against degenerate sigma (would cause divide-by-zero in normalization)
@@ -268,12 +277,16 @@ def evaluate_trial(
     result = EvalResult()
 
     # 1. Calibration on healthy training set
-    calib = compute_calibration(model, train_images, cfg.batch_size, device)
+    calib = compute_calibration(
+        model, train_images, cfg.batch_size, device, score_fn=cfg.score_fn
+    )
     result.mu    = calib["mu"]
     result.sigma = calib["sigma"]
 
-    # 2. Raw MSE on selection set
-    raw_mse = _per_sample_mse(model, selection_data.images, cfg.batch_size)
+    # 2. Raw reconstruction score on selection set
+    raw_mse = _per_sample_mse(
+        model, selection_data.images, cfg.batch_size, score_fn=cfg.score_fn
+    )
     result.raw_mse = raw_mse
 
     # 3. Normalized score (clipped to [0, 1])

@@ -69,7 +69,6 @@ def _spawn_worker(
     output_dir: str,
     n_trials:   int,
     log_dir:    Path,
-    objective:   str = "default",
 ) -> subprocess.Popen:
     """Spawn one worker subprocess with its GPU visibility restricted."""
 
@@ -98,7 +97,6 @@ def _spawn_worker(
         "--output-dir", output_dir,
         "--n-trials",   str(n_trials),
     ]
-    cmd.extend(["--objective", objective])
 
     _log(f"Spawning worker {worker_id} on GPU {gpu_id}, "
          f"n_trials={n_trials}, log={worker_log}")
@@ -168,38 +166,12 @@ def main(argv=None):
                    help="Number of parallel workers (GPUs). Default: 4.")
     p.add_argument("--gpu-ids",    type=int, nargs="+", default=None,
                    help="Which GPU indices to use (default: 0..n_workers-1).")
-    p.add_argument(
-        "--lcfs-mode", action="store_true", default=False,
-        help="Backward-compatible alias for --objective lcfs. Runs the LCFS "
-             "masking preprocessing study."
-    )
-    p.add_argument(
-        "--objective",
-        type=str,
-        default="default",
-        choices=["default", "lcfs", "lcfs_soft"],
-        help="Objective/search-space family to use. Use 'lcfs' for the "
-             "LCFS-masking + SSIM study with the hard-floor objective, or "
-             "'lcfs_soft' for the soft-floor + validity-guard objective."
-    )
     args = p.parse_args(argv)
-
-    if args.lcfs_mode:
-        args.objective = "lcfs"
-
-    # Auto-rename defaults for any LCFS-family objective so a stale default
-    # study name/dir from the non-LCFS workflow doesn't get reused.
-    if args.objective in ("lcfs", "lcfs_soft"):
-        if args.study_name == "ae_topology_v1":
-            args.study_name = "ae_topology_lcfs_v1"
-        if args.output_dir == "study_outputs":
-            args.output_dir = "study_outputs_lcfs"
 
     _banner("AE topology optimization study")
     _log(f"Study name : {args.study_name}")
     _log(f"Study DB   : {args.study_db}")
     _log(f"Output dir : {args.output_dir}")
-    _log(f"Objective  : {args.objective}")
     _log(f"Total trials: {args.n_trials}")
     _log(f"Workers    : {args.n_workers}")
 
@@ -248,9 +220,7 @@ def main(argv=None):
     # from the parent doesn't linger.
     del study
 
-    # Spawn all workers. The selected objective is passed through to each
-    # worker, which chooses tune_lib.objective, tune_lib.objective_lcfs, or
-    # tune_lib.objective_lcfs_soft.
+    # Spawn all workers
     procs: List[subprocess.Popen] = []
     for wid in range(args.n_workers):
         if per_worker[wid] == 0:
@@ -263,7 +233,6 @@ def main(argv=None):
             output_dir = args.output_dir,
             n_trials   = per_worker[wid],
             log_dir    = log_dir,
-            objective   = args.objective,
         )
         procs.append(proc)
 
